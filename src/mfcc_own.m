@@ -1,4 +1,4 @@
-function cn = mfcc_own(s, fs, N, p, M, speaker, plot)
+function [cn, T] = mfcc_own(s, fs, N, p, M)
 %{
  mfcc: Calculate the Mel-Frequency Ceptstral Coefficients
  In:
@@ -14,6 +14,7 @@ function cn = mfcc_own(s, fs, N, p, M, speaker, plot)
  cn - Mel-Frequency Ceptstral Coefficients
  y_t - Time-domain for STFT(Short-Time Fourier Transform)
 %}
+
 
 % A> STFT
 % S = amplitude of stft, M x N
@@ -38,23 +39,5 @@ cn = dct(sk);                   % Discrete Cosine Transform
 
 % E> Normalize mfcc
 cn = cn ./ max(max(abs(cn))); % Using L-inf normalization
-
-% F>  Plot
-%check if the label for speaker exists, otherwise set it to a blank space
-if ~exist('speaker', 'var') || isempty(speaker)
-    speaker = ' ';
-end
-
-if plot
-    figure;
-    surf(T, 1:p, cn, 'EdgeColor','none'); 
-    view(0, 90); 
-    colorbar;
-    caxis([-1 1]);
-    xlim([min(T), max(T)]); 
-    ylim([1 p]);
-    xlabel('Time (s)'); 
-    ylabel('mfc coefficients');
-    title(speaker);
 
 end
