@@ -5,17 +5,23 @@ N = 256; % window size
 M = 100; % overlap
 p = 20;  % number of filters in filterbank
 
+lbg_p = 15; % length of the column vector for the lbg clustering. 
+K = 4; % number of clusters
+error_thresh = 0.05;
+
 type_signal = 'edit'; %can be 'edit' or 'raw'. if not specified, 'edit' by default
-signal_indexA = 2; %chosen signal to plot their mfcc
+signal_indexA = 2; %signal to plot their mfcc and the lbg clustering
 signal_indexB = 10;
-dim1_signal = 2;    %dimension to plot
+signal_indexC = 3;
+
+dim1_signal = 2;    %dimensions to plot in the mfcc
 dim2_signal = 3;
 
 %% define counters
-fig_count = 1; %figure counter
 numFiles = 11; %number of files
 
 
+fig_count = 1; % initialize figure counter
 %% 1. Read signals
 % First, create the array with the names of the files. Assume that all the
 % files follow the standard 's<i>.wav', where <i> is the identifier of the
@@ -32,7 +38,6 @@ for i = 1:numFiles
     [s{i},Fss{i}]=audioread(files{i});
 end
  
-
 %% 2. eliminate quiet regions
 % normalize and remove quiet regions at the beginning and in the end. 
 s_n = cell(1,numFiles);
@@ -299,8 +304,7 @@ else
 end
     
     
-
-p1 = plot(cn_signal{signal_indexA}(dim1_signal,:)', cn_signal{signal_indexA}(dim2_signal,:)','o');
+p1 = plot(cn_signal{signal_indexA}(dim1_signal,:)', cn_signal{signal_indexA}(dim2_signal,:)','.');
 hold on;
 p2 = plot(cn_signal{signal_indexB}(dim1_signal,:)', cn_signal{signal_indexB}(dim2_signal,:)','*');
 xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
@@ -309,10 +313,43 @@ grid on;
 title("MFCC");
 xlim([-2 2]);
 ylim([-2 2]);
-hold off;
+
+
 
 % plot the filter bank
 %figure;
 %plot(linspace(0,(12500/2), 129), melfb(20, 256, 12500)');
 %title('Mel-spaced filterbank'), xlabel('Frequency (Hz)');
+
+%% 6. Clustering via LBG algorithm & k-means
+%pick the MFCC for speakers the three speakers selected. 
+
+%{
+%find the shortest length of stft to obtain the amount of arrays of the
+%filter banks that will be sent to the lbg vector
+[m1,n1] = size(cn_signal{1});
+[m2,n2] = size(cn_signal{2});
+[m10,n10] = size(cn_signal{10});
+sizestft = min(min(n1,n2),n10);
+S1  = cn_signal{1}(1:sizestft,:)';
+S2  = cn_signal{2}(1:sizestft,:)';
+S10 = cn_signal{10}(1:sizestft,:)';
+%}
+S_A  = cn_signal{signal_indexA}(1:lbg_p,:)';
+S_B  = cn_signal{signal_indexB}(1:lbg_p,:)';
+S_C = cn_signal{signal_indexC}(1:lbg_p,:)';
+
+% lbg algorithm 
+% new_centroids = lbg(samples, M_max, step_size, error_threshold)
+centroids = lbg(S_A, K, 0.01, 0.001);
+p3 = plot(centroids(:,dim1_signal)', centroids(:,dim2_signal)','r+');
+
+hold off;
+
+
+
+
+
+
+
 
