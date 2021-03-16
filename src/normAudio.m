@@ -7,7 +7,7 @@ function s_norm = normAudio(s)
  s_norm - audio vector, with values between -1 and 1. 
 %}
 
-s_norm = s / max(abs(s));
+s_norm = (s-mean(s))/ max(abs(s));
 
 cond = abs(s_norm) > db2mag(-10); 
 index_begin = find(cond, 1, 'first');

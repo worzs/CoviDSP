@@ -10,7 +10,7 @@ K = 8; % number of clusters
 error_thresh = 0.05;
 
 type_signal = 'edit'; %can be 'edit' or 'raw'. if not specified, 'edit' by default
-signal_indexA = 2; %signal to plot their mfcc and the lbg clustering
+signal_indexA = 3; %signal to plot their mfcc and the lbg clustering
 signal_indexB = 10;
 signal_indexC = 2;
 
@@ -19,10 +19,16 @@ dim2_signal = 3;
 
 
 plot_all = false; % boolean to plot the graphs of all the speakers
+
+angle1 = 135; %angles to rotate the 3d plots
+angle2 = 60;
 %% define counters
 numFiles = 11; %number of files
-
 fig_count = 1; % initialize figure counter
+
+%% define directory - subfolder
+directory = './Train/';
+
 %% 1. Read signals
 % First, create the array with the names of the files. Assume that all the
 % files follow the standard 's<i>.wav', where <i> is the identifier of the
@@ -36,7 +42,7 @@ end
 s = cell(1,numFiles);
 Fss = cell(1,numFiles);
 for i = 1:numFiles
-    [s{i},Fss{i}]=audioread(files{i});
+    [s{i},Fss{i}]=audioread([directory, files{i}]);
 end
  
 %% 2. eliminate quiet regions
@@ -253,6 +259,7 @@ plot(s11_n);
 title('s11_n');
 %}
 
+
 %% 4. obtain mel coefficients
 
 %initialize the cells to store the data
@@ -263,8 +270,8 @@ T_edit = cell(1,numFiles);
 
 %obtain the mfcc 
 for i = 1:numFiles
-    [cn_raw_signal{i},T_raw{i}]=mfcc_own(s{i}, Fss{i}, N, p, M);
-    [cn_edit_signal{i},T_edit{i}]=mfcc_own(s_n{i}, Fss{i}, N, p, M);
+    [cn_raw_signal{i},T_raw{i}]=mfcc_own(s{i}(:,1) - mean(s{i}(:,1)), Fss{i}, N, p, M);
+    [cn_edit_signal{i},T_edit{i}]=mfcc_own(s_n{i}(:,1), Fss{i}, N, p, M);
 end
  
 %{
@@ -297,16 +304,20 @@ if plot_all
                 index = 8*(i-1)+j; 
                 subplot(2,4,j);
 
-                surf(T_edit{index}, 1:p, cn_edit_signal{index}, 'EdgeColor','none'); view(0, 90); colorbar;caxis([-1 1]);
-                xlim([min(T_edit{index}), max(T_edit{index})]); ylim([1 p]);
-                xlabel('Time(s)'); ylabel('mfcc');
+                
+                
 
                 if strcmp(type_signal, 'raw')
                     title([files{index}]);
+                    surf(T_raw{index}, 1:p, cn_raw_signal{index}, 'EdgeColor','none'); view(0, 45); colorbar;caxis([-1 1]);
+                    xlim([min(T_raw{index}), max(T_raw{index})]); ylim([1 p]);
                 else 
                     title([files{index} , ' edited']);
+                    surf(T_edit{index}, 1:p, cn_edit_signal{index}, 'EdgeColor','none'); view(0, 45); colorbar;caxis([-1 1]);
+                    xlim([min(T_edit{index}), max(T_edit{index})]); ylim([1 p]);
                 end
-
+                
+                xlabel('Time(s)'); ylabel('mfcc');
 
                 %subplot(2,4,j+4);
                 %plot(s_n{index});
@@ -318,6 +329,51 @@ if plot_all
     end
 end
 
+
+
+
+%Plot the spectrograms and the mfcc for the selected speakers
+figure(fig_count);
+fig_count = fig_count+1;
+subplot(2,2,1)
+[Y, F, T, P] = spectrogram (s{signal_indexA}(:,1), hamming(N,'periodic'), M, N, Fss{signal_indexA});
+surf(T_raw{signal_indexA},F,20*log10(abs(P)),'EdgeColor','none');
+%axis tight;
+view(angle1, angle2); colorbar; %caxis([-60 0]);
+xlabel('Time[s]'); ylabel('Frequency [Hz]');zlabel('Amplitude [dB]')
+title(['Spectrogram ', files{signal_indexA}, ' original']);
+
+subplot(2,2,2)
+%title([files{signal_indexA}]);
+surf(T_raw{signal_indexA}, 1:p, 20*log10(abs(cn_raw_signal{signal_indexA})), 'EdgeColor','none'); view(angle1, angle2); colorbar;caxis([-60 0]);
+xlim([min(T_raw{signal_indexA}), max(T_raw{signal_indexA})]); ylim([1 p]);
+xlabel('Time[s]'); ylabel('MFCC');zlabel('Amplitude [dB]')
+title(['MFCC ', files{signal_indexA}, ' original']);
+ylim([2,p])
+
+subplot(2,2,3);
+%spectrogram(s_n{signal_indexA}(:,1));
+[Y, F, T, P] = spectrogram (s_n{signal_indexA}(:,1), hamming(N,'periodic'), M, N, Fss{signal_indexA});
+surf(T_edit{signal_indexA},F,20*log10(abs(P)),'EdgeColor','none');
+%axis tight;
+view(angle1, angle2); colorbar; %caxis([-60 0]);
+xlabel('Time[s]'); ylabel('Frequency [Hz]');zlabel('Amplitude [dB]')
+title(['Spectrogram ', files{signal_indexA}, ' edited']);
+
+subplot(2,2,4)
+%title([files{signal_indexA}]);
+surf(T_edit{signal_indexA}, 1:p, 20*log10(abs(cn_edit_signal{signal_indexA})), 'EdgeColor','none'); view(angle1, angle2); colorbar;caxis([-60 0]);
+xlim([min(T_edit{signal_indexA}), max(T_edit{signal_indexA})]); ylim([1 p]);
+xlabel('Time[s]'); ylabel('MFCC');zlabel('Amplitude [dB]')
+title(['MFCC ', files{signal_indexA}, ' edited']);
+ylim([2,p])
+
+% plot the filter bank
+figure(fig_count);
+fig_count = fig_count+1;
+plot(linspace(0,(Fss{signal_indexA}/2), N/2+1), melfb(p, N, Fss{signal_indexA})');
+title('Mel filterbank');
+xlabel('Frequency (Hz)');
 
 %{
 %for i = 1:numFiles
@@ -336,7 +392,15 @@ end
 
 
 %% 5. Clustering via LBG algorithm & k-means
+
 %pick the MFCC for speakers the selected speakers.
+% select the vectors to plot, based on the original signal 'raw' or the
+% cropped 'edit'. 
+if strcmp(type_signal, 'raw')
+    cn_signal = cn_raw_signal;
+else 
+    cn_signal = cn_edit_signal;
+end
 
 S_A = cn_signal{signal_indexA}(1:lbg_p,:)';
 S_B = cn_signal{signal_indexB}(1:lbg_p,:)';
@@ -349,13 +413,7 @@ centroids_B = lbg(S_B, K, 0.01, 0.001);
 
 %% 6. plot 2D with any two speakers, the MFCC and the centroids. 
 
-% select the vectors to plot, based on the original signal 'raw' or the
-% cropped 'edit'. 
-if strcmp(type_signal, 'raw')
-    cn_signal = cn_raw_signal;
-else 
-    cn_signal = cn_edit_signal;
-end
+
 
 %plot MFCC and centroids for the first speaker
 figure(fig_count);
@@ -369,7 +427,7 @@ grid on;
 title(["MFCC ", files{signal_indexA}]);
 xlim([-1 1]);
 ylim([-1 1]);
-
+hold off;
 
 %plot MFCC and centroids for the second speaker
 figure(fig_count);
@@ -383,15 +441,13 @@ grid on;
 title(["MFCC ", files{signal_indexB}]);
 xlim([-1 1]);
 ylim([-1 1]);
-
-% plot the filter bank
-%figure;
-%plot(linspace(0,(12500/2), 129), melfb(20, 256, 12500)');
-%title('Mel-spaced filterbank'), xlabel('Frequency (Hz)');
-
-
-
 hold off;
+
+
+
+
+
+
 
 
 
