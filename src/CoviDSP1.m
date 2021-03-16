@@ -6,20 +6,21 @@ M = 100; % overlap
 p = 20;  % number of filters in filterbank
 
 lbg_p = 15; % length of the column vector for the lbg clustering. 
-K = 4; % number of clusters
+K = 8; % number of clusters
 error_thresh = 0.05;
 
 type_signal = 'edit'; %can be 'edit' or 'raw'. if not specified, 'edit' by default
 signal_indexA = 2; %signal to plot their mfcc and the lbg clustering
 signal_indexB = 10;
-signal_indexC = 3;
+signal_indexC = 2;
 
-dim1_signal = 2;    %dimensions to plot in the mfcc
+dim1_signal = 1;    %dimensions to plot in the mfcc
 dim2_signal = 3;
 
+
+plot_all = false; % boolean to plot the graphs of all the speakers
 %% define counters
 numFiles = 11; %number of files
-
 
 fig_count = 1; % initialize figure counter
 %% 1. Read signals
@@ -108,36 +109,78 @@ t = (0:length(s1)-1)/Fss1;
 figure; 
 plot(t, s1); 
 xlim([min(t), max(t)]);
-xlabel('Time (s)'); 
-ylabel('Amplitude'); 
+xlabel('Time (s)');
+ylabel('Amplitude');
 title('Time domain');
 %}
-% plot in time domain, in sets of 4. 
 
-%compare the time domain graphs, before and after cropping the audio .
-subplots = ceil(numFiles/4); % # of subplots
-countFigs = numFiles; % # of figures to plot
-for i = 1:subplots
-    figure(fig_count);
-    fig_count = fig_count+1;
-    
-    for j = 1:4
-        if countFigs >0
-            countFigs = countFigs-1;
-            index = 4*(i-1)+j; 
-            subplot(2,4,j);
-            plot(s{index});
-            title([files{index} , ' original']);
+%plot the time domain graphs for the selected speakers
 
-            subplot(2,4,j+4);
-            plot(s_n{index});
-            title([files{index} , ' edited']);
-        end
-        
-        
-    end 
+%generate the time domain graph
+
+
+%speaker A
+figure(fig_count);
+fig_count = fig_count+1;
+subplot(1,2,1)
+t = (0:length(s{signal_indexA})-1)/Fss{signal_indexA};
+plot(t, s{signal_indexA}); 
+xlim([min(t), max(t)]);
+xlabel('Time (s)');
+ylabel('Amplitude');
+title(['Time domain (original) ', files{signal_indexA}]);
+subplot(1,2,2)
+t = (0:length(s_n{signal_indexA})-1)/Fss{signal_indexA};
+plot(t, s_n{signal_indexA}); 
+xlim([min(t), max(t)]);
+xlabel('Time (s)');
+ylabel('Amplitude');
+title(['Time domain (edited) ', files{signal_indexA}]);
+
+%speaker B
+figure(fig_count);
+fig_count = fig_count+1;
+subplot(1,2,1)
+t = (0:length(s{signal_indexB})-1)/Fss{signal_indexB};
+plot(t, s{signal_indexB}); 
+xlim([min(t), max(t)]);
+xlabel('Time (s)');
+ylabel('Amplitude');
+title(['Time domain (original) ', files{signal_indexB}]);
+subplot(1,2,2)
+t = (0:length(s_n{signal_indexB})-1)/Fss{signal_indexB};
+plot(t, s_n{signal_indexB}); 
+xlim([min(t), max(t)]);
+xlabel('Time (s)');
+ylabel('Amplitude');
+title(['Time domain (edited) ', files{signal_indexB}]);
+
+if plot_all
+    % plot in time domain, in sets of 4, of all the speakers.  
+    %compare the time domain graphs, before and after cropping the audio .
+    subplots = ceil(numFiles/4); % # of subplots
+    countFigs = numFiles; % # of figures to plot
+    for i = 1:subplots
+        figure(fig_count);
+        fig_count = fig_count+1;
+
+        for j = 1:4
+            if countFigs >0
+                countFigs = countFigs-1;
+                index = 4*(i-1)+j; 
+                subplot(2,4,j);
+                plot(s{index});
+                title([files{index} , ' original']);
+
+                subplot(2,4,j+4);
+                plot(s_n{index});
+                title([files{index} , ' edited']);
+            end
+
+
+        end 
+    end
 end
-
 
 %{
 figure(fig_count);
@@ -211,10 +254,8 @@ title('s11_n');
 %}
 
 %% 4. obtain mel coefficients
-%N = 256; % window size
-%M = 100; % overlap
-%p = 40;  % number of filters in filterbank
 
+%initialize the cells to store the data
 cn_raw_signal = cell(1,numFiles);
 cn_edit_signal = cell(1,numFiles);
 T_raw = cell(1,numFiles); 
@@ -242,30 +283,39 @@ end
 %}
 
 %plot mfcc
-subplots = ceil(numFiles/8); % # of subplots
-countFigs = numFiles; % # of figures to plot
-for i = 1:subplots
-    figure(fig_count);
-    fig_count = fig_count+1;
-    
-    for j = 1:8
-        if countFigs >0
-            countFigs = countFigs-1;
-            index = 8*(i-1)+j; 
-            subplot(2,4,j);
-            
-            surf(T_edit{index}, 1:p, cn_edit_signal{index}, 'EdgeColor','none'); view(0, 90); colorbar;caxis([-1 1]);
-            xlim([min(T_edit{index}), max(T_edit{index})]); ylim([1 p]);
-            xlabel('Time(s)'); ylabel('mfcc');
-            title([files{index} , ' edited']);
-            
-            %subplot(2,4,j+4);
-            %plot(s_n{index});
-            %title([files{index} , ' edited']);
-        end
-        
-        
-    end 
+if plot_all
+    % plot the mfcc in sets of 8, of all the speakers. 
+    subplots = ceil(numFiles/8); % # of subplots
+    countFigs = numFiles; % # of figures to plot
+    for i = 1:subplots
+        figure(fig_count);
+        fig_count = fig_count+1;
+
+        for j = 1:8
+            if countFigs >0
+                countFigs = countFigs-1;
+                index = 8*(i-1)+j; 
+                subplot(2,4,j);
+
+                surf(T_edit{index}, 1:p, cn_edit_signal{index}, 'EdgeColor','none'); view(0, 90); colorbar;caxis([-1 1]);
+                xlim([min(T_edit{index}), max(T_edit{index})]); ylim([1 p]);
+                xlabel('Time(s)'); ylabel('mfcc');
+
+                if strcmp(type_signal, 'raw')
+                    title([files{index}]);
+                else 
+                    title([files{index} , ' edited']);
+                end
+
+
+                %subplot(2,4,j+4);
+                %plot(s_n{index});
+                %title([files{index} , ' edited']);
+            end
+
+
+        end 
+    end
 end
 
 
@@ -283,66 +333,63 @@ end
 %xlabel('Time (s)'); ylabel('mfcc');
 %}
 
-%% 5. plot 2D with any two speakers ,2D
 
-%TODO: how to choose the index of the mel fb to plot.
-%Also, why only some indices seem to be in cluster, while others not. 
 
-%signal_indexA = 2;
-%signal_indexB = 3;
-%5dim1_signal = 6;
-%dim2_signal = 3;
+%% 5. Clustering via LBG algorithm & k-means
+%pick the MFCC for speakers the selected speakers.
 
-%plot MFCC, 2D. 
-figure(fig_count);
-fig_count = fig_count+1;
+S_A = cn_signal{signal_indexA}(1:lbg_p,:)';
+S_B = cn_signal{signal_indexB}(1:lbg_p,:)';
+S_C = cn_signal{signal_indexC}(1:lbg_p,:)';
 
+% lbg algorithm 
+% new_centroids = lbg(samples, M_max, step_size, error_threshold)
+centroids_A = lbg(S_A, K, 0.01, 0.001);
+centroids_B = lbg(S_B, K, 0.01, 0.001);
+
+%% 6. plot 2D with any two speakers, the MFCC and the centroids. 
+
+% select the vectors to plot, based on the original signal 'raw' or the
+% cropped 'edit'. 
 if strcmp(type_signal, 'raw')
     cn_signal = cn_raw_signal;
 else 
     cn_signal = cn_edit_signal;
 end
-    
-    
-p1 = plot(cn_signal{signal_indexA}(dim1_signal,:)', cn_signal{signal_indexA}(dim2_signal,:)','.');
+
+%plot MFCC and centroids for the first speaker
+figure(fig_count);
+fig_count = fig_count+1;
+plot(cn_signal{signal_indexA}(dim1_signal,:)', cn_signal{signal_indexA}(dim2_signal,:)','ro');
 hold on;
-p2 = plot(cn_signal{signal_indexB}(dim1_signal,:)', cn_signal{signal_indexB}(dim2_signal,:)','*');
+plot(centroids_A(:,dim1_signal)', centroids_A(:,dim2_signal)','k*');
 xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
-legend(files{signal_indexA}, files{signal_indexB});
+legend(files{signal_indexA}, 'centroids');
 grid on;
-title("MFCC");
-xlim([-2 2]);
-ylim([-2 2]);
+title(["MFCC ", files{signal_indexA}]);
+xlim([-1 1]);
+ylim([-1 1]);
 
 
+%plot MFCC and centroids for the second speaker
+figure(fig_count);
+fig_count = fig_count+1;
+plot(cn_signal{signal_indexB}(dim1_signal,:)', cn_signal{signal_indexB}(dim2_signal,:)','ro');
+hold on;
+plot(centroids_B(:,dim1_signal)', centroids_B(:,dim2_signal)','b*');
+xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
+legend(files{signal_indexB}, 'centroids');
+grid on;
+title(["MFCC ", files{signal_indexB}]);
+xlim([-1 1]);
+ylim([-1 1]);
 
 % plot the filter bank
 %figure;
 %plot(linspace(0,(12500/2), 129), melfb(20, 256, 12500)');
 %title('Mel-spaced filterbank'), xlabel('Frequency (Hz)');
 
-%% 6. Clustering via LBG algorithm & k-means
-%pick the MFCC for speakers the three speakers selected. 
 
-%{
-%find the shortest length of stft to obtain the amount of arrays of the
-%filter banks that will be sent to the lbg vector
-[m1,n1] = size(cn_signal{1});
-[m2,n2] = size(cn_signal{2});
-[m10,n10] = size(cn_signal{10});
-sizestft = min(min(n1,n2),n10);
-S1  = cn_signal{1}(1:sizestft,:)';
-S2  = cn_signal{2}(1:sizestft,:)';
-S10 = cn_signal{10}(1:sizestft,:)';
-%}
-S_A  = cn_signal{signal_indexA}(1:lbg_p,:)';
-S_B  = cn_signal{signal_indexB}(1:lbg_p,:)';
-S_C = cn_signal{signal_indexC}(1:lbg_p,:)';
-
-% lbg algorithm 
-% new_centroids = lbg(samples, M_max, step_size, error_threshold)
-centroids = lbg(S_A, K, 0.01, 0.001);
-p3 = plot(centroids(:,dim1_signal)', centroids(:,dim2_signal)','r+');
 
 hold off;
 
