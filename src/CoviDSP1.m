@@ -6,16 +6,17 @@ M = 100; % overlap
 p = 20;  % number of filters in filterbank
 
 lbg_p = 15; % length of the column vector for the lbg clustering. 
-K = 8; % number of clusters
+K = 32; % number of clusters
 error_thresh = 0.05;
+start_index_p = 2; %index to remove the first MFCC
 
 type_signal = 'edit'; %can be 'edit' or 'raw'. if not specified, 'edit' by default
 signal_indexA = 3; %signal to plot their mfcc and the lbg clustering
 signal_indexB = 10;
 signal_indexC = 2;
 
-dim1_signal = 1;    %dimensions to plot in the mfcc
-dim2_signal = 3;
+dim1_signal = 3;    %dimensions to plot in the mfcc
+dim2_signal = 5;
 
 
 plot_all = false; % boolean to plot the graphs of all the speakers
@@ -349,7 +350,7 @@ surf(T_raw{signal_indexA}, 1:p, 20*log10(abs(cn_raw_signal{signal_indexA})), 'Ed
 xlim([min(T_raw{signal_indexA}), max(T_raw{signal_indexA})]); ylim([1 p]);
 xlabel('Time[s]'); ylabel('MFCC');zlabel('Amplitude [dB]')
 title(['MFCC ', files{signal_indexA}, ' original']);
-ylim([2,p])
+ylim([start_index_p,p])
 
 subplot(2,2,3);
 %spectrogram(s_n{signal_indexA}(:,1));
@@ -366,7 +367,7 @@ surf(T_edit{signal_indexA}, 1:p, 20*log10(abs(cn_edit_signal{signal_indexA})), '
 xlim([min(T_edit{signal_indexA}), max(T_edit{signal_indexA})]); ylim([1 p]);
 xlabel('Time[s]'); ylabel('MFCC');zlabel('Amplitude [dB]')
 title(['MFCC ', files{signal_indexA}, ' edited']);
-ylim([2,p])
+ylim([start_index_p,p])
 
 % plot the filter bank
 figure(fig_count);
@@ -402,9 +403,9 @@ else
     cn_signal = cn_edit_signal;
 end
 
-S_A = cn_signal{signal_indexA}(1:lbg_p,:)';
-S_B = cn_signal{signal_indexB}(1:lbg_p,:)';
-S_C = cn_signal{signal_indexC}(1:lbg_p,:)';
+S_A = cn_signal{signal_indexA}(start_index_p:lbg_p,:)';
+S_B = cn_signal{signal_indexB}(start_index_p:lbg_p,:)';
+S_C = cn_signal{signal_indexC}(start_index_p:lbg_p,:)';
 
 % lbg algorithm 
 % new_centroids = lbg(samples, M_max, step_size, error_threshold)
@@ -420,7 +421,7 @@ figure(fig_count);
 fig_count = fig_count+1;
 plot(cn_signal{signal_indexA}(dim1_signal,:)', cn_signal{signal_indexA}(dim2_signal,:)','ro');
 hold on;
-plot(centroids_A(:,dim1_signal)', centroids_A(:,dim2_signal)','k*');
+plot(centroids_A(:,dim1_signal-1)', centroids_A(:,dim2_signal-1)','k*');
 xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
 legend(files{signal_indexA}, 'centroids');
 grid on;
@@ -434,7 +435,7 @@ figure(fig_count);
 fig_count = fig_count+1;
 plot(cn_signal{signal_indexB}(dim1_signal,:)', cn_signal{signal_indexB}(dim2_signal,:)','ro');
 hold on;
-plot(centroids_B(:,dim1_signal)', centroids_B(:,dim2_signal)','b*');
+plot(centroids_B(:,dim1_signal-1)', centroids_B(:,dim2_signal-1)','b*');
 xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
 legend(files{signal_indexB}, 'centroids');
 grid on;
@@ -444,6 +445,105 @@ ylim([-1 1]);
 hold off;
 
 
+
+
+
+
+%% Testing
+% define counters
+numFiles = 8; %number of test files
+% define directory - subfolder
+directory = './Test/';
+% 1. Read test signals
+% First, create the array with the names of the files. Assume that all the
+% files follow the standard 's<i>.wav', where <i> is the identifier of the
+% speaker. 
+%% TEST Buffer cells
+t_files = cell(1,numFiles);
+t_s = cell(1,numFiles);
+t_Fss = cell(1,numFiles);
+t_s_n = cell(1,numFiles);
+t_cn_raw_signal = cell(1,numFiles);
+t_cn_edit_signal = cell(1,numFiles);
+t_T_raw = cell(1,numFiles); 
+t_T_edit = cell(1,numFiles);
+
+recognition_rate=zeros(11, 1);
+test_num_max = 1;
+test_num = 0;
+a=0;
+%% Read, load, normalize, mfcc for test signals
+for i = 1:numFiles
+    t_files{i} = ['s',num2str(i),'.wav'];
+    [t_s{i},t_Fss{i}]=audioread([directory, t_files{i}]);
+    for j_1=1:test_num_max    
+        test_num = test_num + 1; 
+        err_vec = zeros(11,1); %matrix use for error in testing
+        t_s_n{i}=normAudio(t_s{i}); 
+        [t_cn_raw_signal{i},t_T_raw{i}]=mfcc_own(t_s{i}(:,1) - mean(t_s{i}(:,1)), t_Fss{i}, N, p, M);
+        [t_cn_edit_signal{i}, t_T_edit{i}]=mfcc_own(t_s_n{i}(:,1), t_Fss{i}, N, p, M);
+
+        if strcmp(type_signal, 'raw')
+            t_cn_signal = t_cn_raw_signal;
+        else 
+            t_cn_signal = t_cn_edit_signal;
+        end
+        %t_new_centroids = lbg(samples, M_max, step_size, error_threshold);
+        %% plot test signals
+        t_centroids_N=[];
+        t_S_N = t_cn_signal{i}(1:lbg_p,:)';
+        t_centroids_N(:, :) = lbg(t_S_N, K, 0.01, 0.001);
+        figure(fig_count);
+        fig_count = fig_count+1;
+        plot(t_cn_signal{i}(dim1_signal,:)', t_cn_signal{i}(dim2_signal,:)','ro');
+        hold on;
+        plot(t_centroids_N(:,dim1_signal)', t_centroids_N(:,dim2_signal)','b*');
+        xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
+        legend(t_files{i}, 'centroids');
+        grid on;
+        title(["TEST MFCC ", t_files{i}]);
+        xlim([-1 1]);
+        ylim([-1 1]);
+        hold off;
+        
+        %%
+        test_edit_signal = cn_signal{i}(1:lbg_p,:)';     % turn cell into matrix   
+        match_num = 0;
+        for k=1:11
+            codebook=squeeze(centroids_codebook(k,:,:)); 
+            % centroids_codebook is the array of training-signals centroids line 414
+            % codebook is the matrix of each training signal
+                                                        
+            err = 0;
+            t_num = length(test_edit_signal(:,1));  % time of the test signal
+            codebook_num = length(codebook(:, 1));  % time of the codebook
+            for c=1:t_num
+                cur_err = [];
+                for j=1:codebook_num
+                    cur_err = [cur_err; norm(test_edit_signal(c,:) - codebook(j,:),2)]; % Euclidean distance between test signals and codebooks
+                end
+                [val, ind] = min(cur_err); % minimum error with each time slot
+                err = err + val;           % error for the whole time
+            end
+            err = err/t_num;               % mean error with each of the codebook
+            err_vec(k) = err;              % save each mean error in a vector
+        end
+        [val, ind] = min(err_vec);         % minimum mean error with each signal
+        if ind==i
+           match_num = match_num + 1;
+%         elseif val > 0.2
+%            print('no match found');
+        end
+        
+    end
+    recognition_rate(i) = match_num/test_num; 
+    display(match_num);
+    test_num = 0;
+    match_num = 0;
+    display(t_files{i});
+    display(recognition_rate');
+end
+%}
 
 
 
