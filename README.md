@@ -31,12 +31,29 @@ Speakers 9, 10 and 11 have stereo recordings. In the next figure, we compare the
 
 ![image](https://github.com/worzs/CoviDSP/blob/main/src/img/time_original_edited_s10.png)
 
-Data visualization and preprocessing is critical to improve the feature extraction stage. If we train our system with useless datasets, our results will be affected and the most important features for each speaker will be hidden.
+Data visualization and preprocessing is critical to improve the feature extraction stage. If we train our system with useless datasets, our results will be affected and the most important features for each speaker will be hidden. 
 
 ---
-### C. Results
+### C. Feature extraction
+
+After the data preprocessing, the Short-Time Fourier Transform was applied to the blocks of the original signal. The size of the frame is N=256 with a Hamming window applied, and an overlap of M = 100 samples between. 
+The spectrograms of the speakers were plotted. The spectral content of the signals shows higher manigtudes near low frequencies. Then, the Mel filterbank with size 20 wrapped the fourier transform of the signal blocks and we also obtained the cepstrum coefficients by applying the Discrete Cosine Transform.  
+
+Mel filter bank:
+
+![image](https://github.com/worzs/CoviDSP/blob/main/src/img/melfb.png)
+
+Speaker 3
+
+![image](https://github.com/worzs/CoviDSP/blob/main/src/img/spectrogram_mfcc_s3.png)
+
+Speaker 10
+
+![image](https://github.com/worzs/CoviDSP/blob/main/src/img/spectrogram_mfcc_s10.png)
 
 ---
+### D. Results
+
 #####      1. Original samples. 
 
 
@@ -66,7 +83,7 @@ TODO
 
 ---
 
-### D. Instructions to run the code
+### E. Instructions to run the code
 
 Start by cloning the repository.
 
