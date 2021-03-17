@@ -1,4 +1,4 @@
-# CoviDSP
+# CoviDSP 🔊🎙️
 
 ## Final Project: Speaker recognition system
 
@@ -12,20 +12,33 @@ EEC201 - University of California, Davis. Winter Quarter 2021
 
 
 ---
----
+
 ### A. Introduction 
 
-TODO
+The purpose of the project is to build an automatic speaker recognition system. Features were extracted from input speech [files](https://github.com/worzs/CoviDSP/tree/main/src/Train), by applying th Fourier Transform to the signal, and then obtaining the Mel frequeny cepstrum coefficients (MFCC). The characteristics of an audio signal vary over time. Therefore, applying Windowing and the Short Time Fourier Transform is convenient to locate the regions with useful information, and isolate the useless sectors. 
+
+After the feature extraction, we are ready to calculate the centroids using the LBG algorithm. They are the codewords of the codebook for each speaker. Finally, we test the system by identifying the speaker in a different dataset. 
+
+TODO: add flow diagrams
+---
+### B. Data preprocessing
+
+ Before the feature extraction process, the signals were analyzed to obtain general characteristics like shape, amplitude, mean, noise and quiet regions. In the following figures we compare the raw  and edited signals of speaker 3. The original samples show quiet regions. They were cropped (removing all samples with amplitude lower than -10 dB at the beginning and at the end), and we also performed an amplitude normalization to be between -1 and 1. Only monophonic sound was considered. 
+ 
+![image](https://github.com/worzs/CoviDSP/blob/main/src/img/time_original_edited_s3.png)
+
+Speakers 9, 10 and 11 have stereo recordings. In the next figure, we compare the raw data and the edited signal for speaker 10. 
+
+![image](https://github.com/worzs/CoviDSP/blob/main/src/img/time_original_edited_s10.png)
+
+Data visualization and preprocessing is critical to improve the feature extraction stage. If we train our system with useless datasets, our results will be affected and the most important features for each speaker will be hidden.
 
 ---
----
-### B. Results
+### C. Results
 
 ---
-##### 1. Original samples. 
+#####      1. Original samples. 
 
-
-![image](https://user-images.githubusercontent.com/33579806/111231274-3ed2cd80-85a6-11eb-8292-277afc8f1f41.png)
 
 Figure X: VQ for Speaker 3. 
 
@@ -52,8 +65,8 @@ Table X: Results
 TODO
 
 ---
----
-### C. Instructions to run the code
+
+### D. Instructions to run the code
 
 Start by cloning the repository.
 
