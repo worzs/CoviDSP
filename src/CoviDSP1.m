@@ -412,9 +412,32 @@ S_C = cn_signal{signal_indexC}(start_index_p:lbg_p,:)';
 centroids_A = lbg(S_A, K, 0.01, 0.001);
 centroids_B = lbg(S_B, K, 0.01, 0.001);
 
+centroids_codebook = zeros(11, K, 15);
+for i = 1:8
+    S_N = cn_signal{i}(1:lbg_p,:)';
+    centroids_N = lbg(S_N, K, 0.01, 0.001);
+    centroids_codebook(i, :, :) = centroids_N;
+end
+%{  
+for i = 1:11
+    centroids_N=[];
+    S_N = cn_signal{i}(1:lbg_p,:)';
+    centroids_N(:, :) = lbg(S_N, K, 0.01, 0.001);
+    figure(fig_count);
+    fig_count = fig_count+1;
+    plot(cn_signal{i}(dim1_signal,:)', cn_signal{i}(dim2_signal,:)','ro');
+    hold on;
+    plot(centroids_N(:,dim1_signal)', centroids_N(:,dim2_signal)','b*');
+    xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
+    legend(files{i}, 'centroids');
+    grid on;
+    title(["TEST MFCC ", files{i}]);
+    xlim([-1 1]);
+    ylim([-1 1]);
+    hold off;
+end
+%}
 %% 6. plot 2D with any two speakers, the MFCC and the centroids. 
-
-
 
 %plot MFCC and centroids for the first speaker
 figure(fig_count);
@@ -443,10 +466,6 @@ title(["MFCC ", files{signal_indexB}]);
 xlim([-1 1]);
 ylim([-1 1]);
 hold off;
-
-
-
-
 
 
 %% Testing
