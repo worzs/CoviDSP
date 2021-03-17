@@ -93,14 +93,13 @@ In the next graphs, the 3rd and 5th dimensions of the centroids and the accousti
 
 #####      1. Original samples. 
 
+Accuracy results with the Test dataset. 
 
-Figure X: VQ for Speaker 3. 
+Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
+--- | --- | --- | --- |--- |--- |--- |--- |--- 
+Accuracy | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% 
 
-Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
---- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
-Accuracy | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
-
-Table X: Results
+Our system is able to match the 8 speakers from the training and test datasets. 
 
 ---
 ##### 2. Original samples with noise added. 
@@ -118,11 +117,18 @@ Table X: Results
 
 TODO
 
+Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
+--- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
+Accuracy | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
+
 ---
 ##### 4. Testing with different audio signals 
 
 TODO
 
+Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
+--- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
+Accuracy | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
 
 ### F. Instructions to run the code
 
