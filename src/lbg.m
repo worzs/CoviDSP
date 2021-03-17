@@ -62,4 +62,4 @@ function new_centroids = lbg(samples, M_max, step_size, error_threshold)
         end
     end
 
-    new_centroids(all(~new_centroids, 2), :) = []; % Remove zero rows
+    %new_centroids(all(~new_centroids, 2), :) = []; % Remove zero rows
