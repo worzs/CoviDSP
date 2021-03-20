@@ -211,7 +211,19 @@ Accuracy | 0% | 100% | 100% | 100% | 100% | 0% | 100% | 100%
 
 ---
 #### 2. Original samples with noise added. 
+```matlab
+%windowing parameters
+N = 256; % window size
+M = 100; % overlap
+p = 20;  % number of filters in filterbank
 
+%lbg parameters
+lbg_p = 15; % length of the column vector for the lbg clustering. 
+K = 32; % number of clusters
+
+%normalization
+type_signal = 'edit'; %'edit': normalized signal; 'raw': original signal
+```
 We use the function randn in MATLAB to generate the noise to the signals. The randn function generates pseudo-random numbers whose elements are normally distributed with mean 0 and variance 1 (standard normal). Which is also known as the function to generate Gaussian distributed variables. We added 4 different variances to generate 4 degree of noise which is 0.001, 0.0035, 0.006, and 0.013 corresponds to the signal-to-noise ratio (SNR) 25 dB, 15dB, 10dB, and 5dB, respectively. The figure is an example of the signals of speaker 4 and speaker 6 with and without noise added. The figure shows that the noise is added with a variance of 0.013 (~SNR = 5dB), which is a level that our system starts to lose accuracy from recognition.
 
 Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
