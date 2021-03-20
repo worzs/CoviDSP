@@ -244,7 +244,7 @@ Accuracy | 100% | 100% | 100% |  0%  | 100% |  0%  | 100% | 0%
 
 With 0.013 as the variance of the noise (~SNR = 5 dB)
 
-![S4_orignial](https://github.com/worzs/CoviDSP/blob/main/src/img/S4_original.jpg)
+![S4_orignial](https://github.com/worzs/CoviDSP/blob/main/src/img/S4_original.jpg) | ![S4_with_noise](https://github.com/worzs/CoviDSP/blob/main/src/img/S4_with_noise.jpg)
 ![S4_with_noise]
 ![S6_orignial]
 ![S6_with_noise]
