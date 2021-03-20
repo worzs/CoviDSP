@@ -223,11 +223,54 @@ Table X: Results
 ---
 #### 3. Original samples with notch filters at different frequencies. 
 
-TODO
 
-Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
---- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
-Accuracy | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
+We modified the parameters of the filter bank size, clusters and we also set the signal type to be normalized. 
+```matlab
+%windowing parameters
+N = 256; % window size
+M = 100; % overlap
+p = 16;  % number of filters in filterbank
+
+%lbg parameters
+lbg_p = 15; % length of the column vector for the lbg clustering. 
+K = 16; % number of clusters
+
+%normalization
+type_signal = 'edit'; %'edit': normalized signal; 'raw': original signal
+```
+
+Our first notch filter was centered at 1 KHz, with a bandwidth of 400 Hz. 
+Speaker 4 frequency response | Speaker 4 spectrogram
+--- | --- 
+![s4_notch_1k_bw_400](https://user-images.githubusercontent.com/33579806/111867789-8dc88c00-8933-11eb-851c-2f65b4f286f4.png) | ![s4_notch_1k_bw_400_spectrogram](https://user-images.githubusercontent.com/33579806/111867790-902ae600-8933-11eb-89e7-b02c76fa968f.png)
+
+
+We got an accuracy of 100% for all the speakers. If we see in the spectrogram, the majority of spectral content is located in lower frequencies. 
+
+Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
+--- | --- | --- | --- |--- |--- |--- |--- |--- 
+Accuracy | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% 
+
+
+Now we tried with a notch filter centered at 500 Hz, with a bandwidth of 500 Hz. The accuracy decreased to 6/8, two speakers were not matched. 
+
+Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
+--- | --- | --- | --- |--- |--- |--- |--- |--- 
+Accuracy | 100% | 0% | 100% | 100% | 100% | 0% | 100% | 100% 
+
+If we examine the frequency response and the spectrogram of speaker 6, we notice that an important slice of data was truncated by the notch filter. In low frequencies there is essential spectral content. If we remove it, the system will not recognize the speaker. 
+
+Speaker 6 frequency response | Speaker 6 spectrogram
+--- | --- 
+![s6_notch_500_bw_500](https://user-images.githubusercontent.com/33579806/111868032-ea787680-8934-11eb-96fb-50e772c9ed3e.png) | ![s6_notch_500_bw_500_spectrogram](https://user-images.githubusercontent.com/33579806/111868033-ec423a00-8934-11eb-98e6-9f9da8b66f29.png)
+
+A similar behavior is observed in the spectrogram and frequency response of speaker 2, the second that was not recognized in the test set. 
+
+Speaker 2 frequency response | Speaker 2 spectrogram
+--- | --- 
+![s2_notch_500_bw_500](https://user-images.githubusercontent.com/33579806/111868124-5e1a8380-8935-11eb-8eef-53b8726ad751.png) | ![s2_notch_500_bw_500_spectrogram](https://user-images.githubusercontent.com/33579806/111868127-61157400-8935-11eb-9c53-9ac70ba5e0bc.png)
+
+In conclusion, different speakers have their own features in the frequency domain. It is possible to fool a speaker recognition system by removing the main frequencies of the speaker, applying notch filters. For the provided samples, the most relevant spectral content was located in lower frequencies (around 500 Hz). 
 
 ---
 #### 4. Testing with different audio signals 
@@ -242,9 +285,9 @@ Accuracy | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
 
 Start by cloning the repository.
 
-CoviDSP1.m generates the codebooks and test the recognition based on the samples from all t. 
+CoviDSP1.m generates the codebooks and test the recognition based on the samples from all t.
 
-You can modify the parameters at the top of CoviDSP1.m before running it, to explore the clustering and accuracy of the system. 
+You can modify the parameters at the top of CoviDSP1.m before running it, to explore the clustering and accuracy of the system.  Next, main_notch.m trains and tests the system with notch filters applied. You can modify the same parameters, including the notch frequency and the bandwidth of the filter. 
  
  The most relevant:
 ```matlab
