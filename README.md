@@ -77,9 +77,9 @@ Bottom-Right: Frequency response mapped to the accoustic vectors (MFCCs) of the 
 ---
 ### D. Clustering
 
-From the previous step, we take the MFCCs of the normalized, cropped signal because they provide useful information from the active regions of the audio. Then we calculate the centroids using the LGB algorithm with K = 8 centroids, epsilon (splitting parameter) 0.01, and an error threshold (distortion) 0.001. The distance criteria is the euclidean norm (L2). 
+From the previous step, we take the MFCCs of the normalized, cropped signal because they provide useful information from the active regions of the audio. Then we calculate the centroids using the LGB algorithm with K centroids, epsilon (splitting parameter) 0.01, and an error threshold (distortion) 0.001. The distance criteria is the euclidean norm (L2). 
 
-In the next graphs, the 3rd and 5th dimensions of the centroids and the accoustic vectors of two speakers are plotted. The codewords converge among the clusters of the speakers. 
+In the next graphs, the 3rd and 5th dimensions of the centroids and the accoustic vectors of two speakers are plotted, K = 8. The codewords converge among the clusters of the speakers. 
 
 #### Speaker 3
 
@@ -92,18 +92,125 @@ In the next graphs, the 3rd and 5th dimensions of the centroids and the accousti
 ---
 ### E. Results
 
-#####      1. Original samples. 
+####      1. Original samples. 
 
-Accuracy results with the Test dataset. 
+In the following table we summarize the results of the system when it matches speakers from the original training and test sets. Parameters:
+```matlab
+%windowing parameters
+N = 256; % window size
+M = 100; % overlap
+p = 20;  % number of filters in filterbank
+
+%lbg parameters
+lbg_p = 15; % length of the column vector for the lbg clustering. 
+K = 32; % number of clusters
+
+%normalization
+type_signal = 'edit'; %'edit': normalized signal; 'raw': original signal
+```
+
+The accuracy is 100% or 0%, and it represents if the system recognizes the speaker from the test dataset based on the codebook created with the training dataset. It was able to recognize the 8 speakers. 
 
 Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
 --- | --- | --- | --- |--- |--- |--- |--- |--- 
 Accuracy | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% 
 
-Our system is able to match the 8 speakers from the training and test datasets. 
+Next, we show the codebook error (based on the distances from the codebook) of each speaker. The values are not higher than 5%. 
+
+![error_original_parameters](https://user-images.githubusercontent.com/33579806/111860293-db2d0500-8903-11eb-8f23-a2624caf9137.png)
+
+A comparison between the centroids obtained with the training data (dimensions 3 and 5), and the test dataset fit. 
+
+Speaker 8 Training | Speaker 8 Test
+--- | --- 
+![centroids_mfcc3_mfcc5_s8_k32](https://user-images.githubusercontent.com/33579806/111860649-29430800-8906-11eb-88a2-2508bb971ed9.png) | ![centroids_mfcc3_mfcc5_s8_k32_test](https://user-images.githubusercontent.com/33579806/111860669-48da3080-8906-11eb-9e3a-5509818252d5.png)
+
+
+
+-----------------------------
+We modified the parameters to determine their relevance. 
+First, we tried with the original signal without the normalization step. 
+
+```matlab
+%windowing parameters
+N = 256; % window size
+M = 100; % overlap
+p = 20;  % number of filters in filterbank
+
+%lbg parameters
+lbg_p = 15; % length of the column vector for the lbg clustering. 
+K = 32; % number of clusters
+
+%normalization
+type_signal = 'raw'; %'edit': normalized signal; 'raw': original signal
+```
+
+The system is still able to recognize the all the speakers. 
+
+Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
+--- | --- | --- | --- |--- |--- |--- |--- |--- 
+Accuracy | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% 
+
+The error is almost constant, between 4% and 5%, for each speaker. 
+
+![error_original_parameters_raw](https://user-images.githubusercontent.com/33579806/111860861-8be8d380-8907-11eb-89f9-dc8741b9b531.png)
+
+Again, we made a comparison between the centroids obtained with the training data (dimensions 3 and 5), and the test dataset fit. It is clear that the clusters are closer when the normalization is not performed.
+
+Speaker 8 Training | Speaker 8 Test
+--- | --- 
+![centroids_mfcc3_mfcc5_s8_k32_raw](https://user-images.githubusercontent.com/33579806/111860948-eda93d80-8907-11eb-9b15-2729fa677b38.png) | ![centroids_mfcc3_mfcc5_s8_k32_raw_test](https://user-images.githubusercontent.com/33579806/111860959-f8fc6900-8907-11eb-885c-43849897de55.png)
+
+
+
+-----------------------------
+Now we tried with a lower window size, K= 2 clusters, using the first 5 elements in a 10-element mel filterbank, and including the normalization step for the signal. 
+
+```matlab
+%windowing parameters
+N = 100; % window size
+M = 30; % overlap
+p = 10;  % number of filters in filterbank
+
+%lbg parameters
+lbg_p = 5; % length of the column vector for the lbg clustering. 
+K = 2; % number of clusters
+```
+
+This time, we compared the behavior of the system with the parameters listed above, when the input signal is normalized and when it is not. 
+```matlab
+%normalization
+type_signal = 'edit'; %'edit': normalized signal; 'raw': original signal
+```
+
+
+Without any upper threshold for the tolerable error (maximum distance from the codebook), our system is still able to identify the speakers. The codebook error increased to be around 30% for the speakers. As we said before, the accuracy is still 100% without distance limitations. However, if we set our system to tolerate a maximum of 10% of error, the accuracy goes to 0% for all cases. 
+
+![error_edit_30_percent](https://user-images.githubusercontent.com/33579806/111861344-b8521f00-890a-11eb-8d96-b92576a30d37.png)
+ 
+
+The next graphs show the relevance of the normalization step when the system has reduced characteristics. In other words, a few filters in the filter bank, a smaller window size and a couple of clusters. 
+```matlab
+%normalization
+type_signal = 'raw'; %'edit': normalized signal; 'raw': original signal
+```
+
+Speaker 4 Test edited signal | Speaker 4 original signal
+--- | --- 
+![centroids_mfcc3_mfcc5_s4_k2](https://user-images.githubusercontent.com/33579806/111861321-6e693900-890a-11eb-8691-efe5a462aaf7.png)  |  ![centroids_mfcc3_mfcc5_s4_k2_raw](https://user-images.githubusercontent.com/33579806/111861449-842b2e00-890b-11eb-9edc-9f30b3ac0e23.png)
+
+What is Happening? With a "poor" system, spacing the clusters critical. If they are too close, the speaker identification fails because the codewords are close enough to create  false positives. The normalization of the signal helps here. 
+
+The following table summarizes the accuracy of the system. Speakers 1 and 6 are not matched correctly. 
+
+Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
+--- | --- | --- | --- |--- |--- |--- |--- |--- 
+Accuracy | 0% | 100% | 100% | 100% | 100% | 0% | 100% | 100% 
+
+
 
 ---
-##### 2. Original samples with noise added. 
+#### 2. Original samples with noise added. 
 
 TODO
 
@@ -114,7 +221,7 @@ Accuracy | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
 Table X: Results 
 
 ---
-##### 3. Original samples with notch filters at different frequencies. 
+#### 3. Original samples with notch filters at different frequencies. 
 
 TODO
 
@@ -123,7 +230,7 @@ Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
 Accuracy | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
 
 ---
-##### 4. Testing with different audio signals 
+#### 4. Testing with different audio signals 
 
 TODO
 
