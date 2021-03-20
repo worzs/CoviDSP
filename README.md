@@ -217,16 +217,19 @@ We use the function randn in MATLAB to generate the noise to the signals. The ra
 Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
 --- | --- | --- | --- |--- |--- |--- |--- |--- 
 Accuracy | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% 
+
 With 0.0035 as the variance of the noise (~SNR = 15 dB)
 
 Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
 --- | --- | --- | --- |--- |--- |--- |--- |--- 
 Accuracy | 100% | 100% | 100% | 100% | 100% | 100% | 100% | 100% 
+
 With 0.0060 as the variance of the noise (~SNR = 10 dB)
 
 Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
 --- | --- | --- | --- |--- |--- |--- |--- |--- 
 Accuracy | 100% | 100% | 0% | 100% | 0% | 100% | 100% | 0% 
+
 With 0.013 as the variance of the noise (~SNR = 5 dB)
 
 Table X: Results 
