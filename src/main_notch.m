@@ -11,6 +11,10 @@ error_thresh = 0.05;
 
 type_signal = 'edit'; %can be 'edit' or 'raw'. if not specified, 'edit' by default
 
+%notch filter parameters
+f_notch = 500; % frequency in hertz 
+f_notch_bw = 500;
+
 dim1_signal = 1;    %dimensions to plot in the mfcc
 dim2_signal = 3;
 
@@ -89,27 +93,49 @@ for i = 1:11
     centroids_codebook(i, :, :) = centroids_N;
 end
 
-f_notch = 3000; % 0 Hz, 500 Hz, 1000 Hz, 3000 Hz
-f_notch_bw = 500;
+
 
 
 %% Testing
 recognition_rate=zeros(numFiles, 1);
 %% Read, load, normalize, mfcc for test signals
 for i = 1:numFiles
+    %get the signal and apply the normalization step. 
     gen_sig = s{i};
-    gen_sig = gen_sig + 0 * randn(size(gen_sig));
+    %gen_sig = gen_sig + 0 * randn(size(gen_sig));
     gen_sig = normAudio(gen_sig);
     
     %notch fiter 
-    df = 12.5*1000/(length(gen_sig));
-    notch_n = floor(f_notch_bw/df);
-    stp = floor(f_notch/df)+1;
-    gen_sig_spec = fft(gen_sig);
-    gen_sig_spec(stp:stp+notch_n) = 1e-20;
-    gen_sig_spec((length(gen_sig) -(stp+notch_n):(length(gen_sig) - stp))) = 1e-20;
+    %https://github.com/heguanda2/EEC201_genliu/blob/master/main_script_notch.m
+    df = Fss{i}/(length(gen_sig)); %get the delta in frequency
+    notch_n = floor(f_notch_bw/df); %get the index of the notch frequency
+    step = floor(f_notch/df)+1; %get the step
+    gen_sig_spec = fft(gen_sig); %apply fft to the signal
+    gen_sig_spec(step:step+notch_n) = db2mag(-100);
+    gen_sig_spec((length(gen_sig) -(step+notch_n):(length(gen_sig) - step))) = db2mag(-100); %flat the frequency response around f_notch
     gen_sig = ifft(gen_sig_spec);
     
+    
+    figure()
+    %plot the frequency response
+    plot(-1:2/(length(gen_sig)-1):1 , 20*log10(abs(fftshift(gen_sig_spec))),'k');
+    xlabel('Normalized Frequency \omega/\pi'); ylabel('Magnitude [dB]');
+    grid on;
+    title(['Frequency response ', files{i}]);
+    xlim([0, 1]);
+    %ylim([0 1]);
+    hold off;
+    
+    figure()
+    [Y, F, T, P] = spectrogram (gen_sig, hamming(N,'periodic'), M, N, Fss{i});
+    surf(T_edit{i},F,20*log10(abs(P)),'EdgeColor','none');
+    %axis tight;
+    view(angle1, angle2); colorbar; %caxis([-60 0]);
+    xlabel('Time[s]'); ylabel('Frequency [Hz]');zlabel('Amplitude [dB]')
+    title(['Spectrogram ', files{i}, ' edited']);
+    ylim([0,Fss{i}/2]);
+
+
     if strcmp(type_signal, 'raw')
         [gen_mfcc, ~] = mfcc_own(gen_sig(:,1) - mean(gen_sig(:,1)), Fss{i}, N, p, M);
     else 
