@@ -240,12 +240,14 @@ With 0.0060 as the variance of the noise (~SNR = 10 dB)
 
 Speaker | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 
 --- | --- | --- | --- |--- |--- |--- |--- |--- 
-Accuracy | 100% | 100% | 0% | 100% | 0% | 100% | 100% | 0% 
+Accuracy | 100% | 100% | 100% |  0%  | 100% |  0%  | 100% | 0% 
 
 With 0.013 as the variance of the noise (~SNR = 5 dB)
 
 ![S4_orignial]
 ![S4_with_noise]
+![S6_orignial]
+![S6_with_noise]
 
 Table X: Results 
 
