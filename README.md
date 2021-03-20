@@ -15,13 +15,14 @@ EEC201 - University of California, Davis. Winter Quarter 2021
 
 ### A. Introduction 
 
-The purpose of the project is to build an automatic speaker recognition system. Features were extracted from input speech [files](https://github.com/worzs/CoviDSP/tree/main/src/Train), by applying th Fourier Transform to the signal, and then obtaining the Mel frequeny cepstrum coefficients (MFCC). The characteristics of an audio signal vary over time. Therefore, applying Windowing and the Short Time Fourier Transform is convenient to locate the regions with useful information, and isolate the useless sectors. 
+The purpose of the project is to build an automatic speaker recognition system. Features were extracted from input speech [files](https://github.com/worzs/CoviDSP/tree/main/src/Train), by applying th Fourier Transform to the signal, and then obtaining the Mel frequeny cepstrum coefficients (MFCC). The characteristics of an audio signal vary over time. Therefore, applying Windowing and the Short Time Fourier Transform is convenient to locate the regions with useful information, and isolate the useless sectors. Signals left are the features that are used to train and to evaluate each test speaker.
 
 After the feature extraction, we are ready to calculate the centroids using the LBG algorithm. They are the codewords of the codebook for each speaker. Finally, we test the system by identifying the speaker in a different dataset. 
 
 TODO: add flow diagrams
 ---
 ### B. Data preprocessing
+The input signal contains 11 different individual speaking the word "Zero." Each of the sampling rate is 12.5 KHz.
 
  Before the feature extraction process, the signals were analyzed to obtain general characteristics like shape, amplitude, mean, noise and quiet regions. In the following figures we compare the raw  and edited signals of speaker 3. The original samples show quiet regions. They were cropped (removing all samples with amplitude lower than -10 dB at the beginning and at the end), and we also performed an amplitude normalization to be between -1 and 1. Only monophonic sound was considered. 
  
