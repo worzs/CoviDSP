@@ -94,7 +94,7 @@ In the next graphs, the 3rd and 5th dimensions of the centroids and the accousti
 
 ####      1. Original samples. 
 
-In the following table we summarize the results of the system when it matches speakers from the original training and test sets. Parameters:
+In the following table we summarize the results of the system when it matches speakers from the original training and test sets. From the spectrograms shown previously, the frequency content is mainly concentrated on the indexes 15 and below. Between the indexes 15 and 20, the amplitudes of the spectrum are lower, and they can be discarded to find the codewords. Parameters:
 ```matlab
 %windowing parameters
 N = 256; % window size
@@ -260,3 +260,15 @@ lbg_p = 15; % the first lbg_p filters from the original p will be used for the c
 K = 8; % number of clusters
 error_thresh = 0.05; 
 ```
+
+
+
+### G. References
+
+Y. Linde, A. Buzo & R. Gray, “An algorithm for vector quantizer design”, IEEE Transactions on Communications, Vol.
+28, pp.84-95, 1980
+
+Matlab documentation [Online]. In: https://www.mathworks.com/help/matlab/ Access: March, 2021. 
+
+
+
