@@ -1,23 +1,25 @@
  %include: wavread, hamming, fft, dct, and own function melfb_own.m
 clc;
 close all;
-N = 256; % window size
-M = 100; % overlap
-p = 20;  % number of filters in filterbank
+%windowing parameters
+N = 100; % window size
+M = 30; % overlap
+p = 10;  % number of filters in filterbank
 
-lbg_p = 15; % length of the column vector for the lbg clustering. 
-K = 32; % number of clusters
+%lbg parameters
+lbg_p = 5; % length of the column vector for the lbg clustering. 
+K = 2; % number of clusters
 error_thresh = 0.05;
 start_index_p = 2; %index to remove the first MFCC
 
-type_signal = 'edit'; %can be 'edit' or 'raw'. if not specified, 'edit' by default
+%plotting parameters
+type_signal = 'raw'; %can be 'edit' or 'raw'. if not specified, 'edit' by default
 signal_indexA = 3; %signal to plot their mfcc and the lbg clustering
-signal_indexB = 10;
+signal_indexB = 8;
 signal_indexC = 2;
 
 dim1_signal = 3;    %dimensions to plot in the mfcc
 dim2_signal = 5;
-
 
 plot_all = false; % boolean to plot the graphs of all the speakers
 
@@ -412,7 +414,7 @@ S_C = cn_signal{signal_indexC}(start_index_p:lbg_p,:)';
 centroids_A = lbg(S_A, K, 0.01, 0.001);
 centroids_B = lbg(S_B, K, 0.01, 0.001);
 
-centroids_codebook = zeros(11, K, 15);
+centroids_codebook = zeros(numFiles, K, lbg_p);
 for i = 1:8
     S_N = cn_signal{i}(1:lbg_p,:)';
     centroids_N = lbg(S_N, K, 0.01, 0.001);
@@ -469,8 +471,10 @@ hold off;
 
 
 %% Testing
+%tolerance, to limit the maximum acceptable error to match a speaker. 
+tolerance = 1.00;
 % define counters
-numFiles = 8; %number of test files
+numFilesTest = 8; %number of test files
 % define directory - subfolder
 directory = './Test/';
 % 1. Read test signals
@@ -478,31 +482,33 @@ directory = './Test/';
 % files follow the standard 's<i>.wav', where <i> is the identifier of the
 % speaker. 
 %% TEST Buffer cells
-t_files = cell(1,numFiles);
-t_s = cell(1,numFiles);
-t_Fss = cell(1,numFiles);
-t_s_n = cell(1,numFiles);
-t_cn_raw_signal = cell(1,numFiles);
-t_cn_edit_signal = cell(1,numFiles);
-t_T_raw = cell(1,numFiles); 
-t_T_edit = cell(1,numFiles);
+t_files = cell(1,numFilesTest);
+t_s = cell(1,numFilesTest);
+t_Fss = cell(1,numFilesTest);
+t_s_n = cell(1,numFilesTest);
+t_cn_raw_signal = cell(1,numFilesTest);
+t_cn_edit_signal = cell(1,numFilesTest);
+t_T_raw = cell(1,numFilesTest); 
+t_T_edit = cell(1,numFilesTest);
 
 recognition_rate=zeros(11, 1);
+distortion=zeros(11, 1);
 test_num_max = 1;
 test_num = 0;
 a=0;
 %% Read, load, normalize, mfcc for test signals
-for i = 1:numFiles
+for i = 1:numFilesTest
     t_files{i} = ['s',num2str(i),'.wav'];
     [t_s{i},t_Fss{i}]=audioread([directory, t_files{i}]);
     for j_1=1:test_num_max    
         test_num = test_num + 1; 
         err_vec = zeros(11,1); %matrix use for error in testing
-        t_s_n{i}=normAudio(t_s{i}); 
-        [t_cn_raw_signal{i},t_T_raw{i}]=mfcc_own(t_s{i}(:,1) - mean(t_s{i}(:,1)), t_Fss{i}, N, p, M);
-        [t_cn_edit_signal{i}, t_T_edit{i}]=mfcc_own(t_s_n{i}(:,1), t_Fss{i}, N, p, M);
-
-        if strcmp(type_signal, 'raw')
+        
+        t_s_n{i}=normAudio(t_s{i}); %normalize audio
+        [t_cn_raw_signal{i},t_T_raw{i}]=mfcc_own(t_s{i}(:,1) - mean(t_s{i}(:,1)), t_Fss{i}, N, p, M); %calculate mel frequency cepstrum coefficients for the original signal
+        [t_cn_edit_signal{i}, t_T_edit{i}]=mfcc_own(t_s_n{i}(:,1), t_Fss{i}, N, p, M); %calculate mel frequency cepstrum coefficients for the normalized signal
+        
+        if strcmp(type_signal, 'raw') % decide if we will consider the original or edited signal for testing. 
             t_cn_signal = t_cn_raw_signal;
         else 
             t_cn_signal = t_cn_edit_signal;
@@ -516,9 +522,10 @@ for i = 1:numFiles
         fig_count = fig_count+1;
         plot(t_cn_signal{i}(dim1_signal,:)', t_cn_signal{i}(dim2_signal,:)','ro');
         hold on;
-        plot(t_centroids_N(:,dim1_signal)', t_centroids_N(:,dim2_signal)','b*');
+        %plot(t_centroids_N(:,dim1_signal)', t_centroids_N(:,dim2_signal)','b*');
+        plot(centroids_codebook(i, :, dim1_signal)', centroids_codebook(i, :, dim2_signal)','b*'); %plot test signal vs centroids codebook from training
         xlabel(['mfcc-',num2str(dim1_signal)]); ylabel(['mfcc-',num2str(dim2_signal)]);
-        legend(t_files{i}, 'centroids');
+        legend(t_files{i}, 'centroids codebook');
         grid on;
         title(["TEST MFCC ", t_files{i}]);
         xlim([-1 1]);
@@ -528,7 +535,7 @@ for i = 1:numFiles
         %%
         test_edit_signal = cn_signal{i}(1:lbg_p,:)';     % turn cell into matrix   
         match_num = 0;
-        for k=1:11
+        for k=1:numFiles
             codebook=squeeze(centroids_codebook(k,:,:)); 
             % centroids_codebook is the array of training-signals centroids line 414
             % codebook is the matrix of each training signal
@@ -536,10 +543,11 @@ for i = 1:numFiles
             err = 0;
             t_num = length(test_edit_signal(:,1));  % time of the test signal
             codebook_num = length(codebook(:, 1));  % time of the codebook
-            for c=1:t_num
+            for c=1:t_num %goes from 1 to 8
                 cur_err = [];
-                for j=1:codebook_num
-                    cur_err = [cur_err; norm(test_edit_signal(c,:) - codebook(j,:),2)]; % Euclidean distance between test signals and codebooks
+                for j=1:codebook_num %goes from 1 to 11
+                    euclidean_distance = norm(test_edit_signal(c,:) - codebook(j,:),2);
+                    cur_err = [cur_err; euclidean_distance]; % Euclidean distance between test signals and codebooks
                 end
                 [val, ind] = min(cur_err); % minimum error with each time slot
                 err = err + val;           % error for the whole time
@@ -548,20 +556,40 @@ for i = 1:numFiles
             err_vec(k) = err;              % save each mean error in a vector
         end
         [val, ind] = min(err_vec);         % minimum mean error with each signal
-        if ind==i
+        distortion(i) = val*100;
+        if (ind==i && val < tolerance)
            match_num = match_num + 1;
+           
 %         elseif val > 0.2
 %            print('no match found');
         end
         
     end
     recognition_rate(i) = match_num/test_num; 
-    display(match_num);
+    %display(match_num);
     test_num = 0;
     match_num = 0;
-    display(t_files{i});
-    display(recognition_rate');
+    %display(t_files{i});
+    %display(recognition_rate');
+    %display(err_vec');
 end
+distortion';
+recognition_rate'
+
+figure(fig_count);
+fig_count = fig_count+1;
+%plot(t_cn_signal{i}(dim1_signal,:)', t_cn_signal{i}(dim2_signal,:)','ro');
+stem(distortion(1:numFilesTest)/100);
+hold on;
+%plot(t_centroids_N(:,dim1_signal)', t_centroids_N(:,dim2_signal)','b*');
+%plot(centroids_codebook(i, :, dim1_signal)', centroids_codebook(i, :, dim2_signal)','b*'); %plot test signal vs centroids codebook from training
+xlabel('speaker'); ylabel('distortion');
+grid on;
+title('Distortion');
+xlim([0, numFilesTest+1]);
+ylim([0 1]);
+hold off;
+
 %}
 
 

@@ -6,7 +6,7 @@ function new_centroids = lbg(samples, M_max, step_size, error_threshold)
     
     M = 1;
     old_error = sum(vecnorm(samples - old_centroids, 2, 2)); % compute the first error
-    fprintf("M = %d, error = %f \n", M, old_error);
+    %fprintf("M = %d, error = %f \n", M, old_error);
     
     while(M < M_max)                              % required M clusters
 
@@ -49,7 +49,7 @@ function new_centroids = lbg(samples, M_max, step_size, error_threshold)
                 new_error = new_error + norm(samples(i, :) - old_centroids(codebook_index(i), :), 2);
             end
 
-            fprintf("M = %d, error = %f \n", M, new_error);
+            %fprintf("M = %d, error = %f \n", M, new_error);
             if (new_error == 0)
                 break
             else
