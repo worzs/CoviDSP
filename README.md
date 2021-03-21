@@ -19,7 +19,7 @@ The purpose of the project is to build an automatic speaker recognition system. 
 
 After the feature extraction, we are ready to calculate the centroids using the LBG algorithm. They are the codewords of the codebook for each speaker. Finally, we test the system by identifying the speaker in a different dataset. We achieved 100% of accuracy in several tests, even with reduced features (clusters, filter bank size, window size). One of the most important steps of the project is the data normalization in the preprocessing stage. If we skip it, our accuracy rate is reduced and only 5 or 6 speakers are recognized among the 8 from the test dataset. The separation of the clusters is the key, because when they are close enough, the system returns false positives. 
 
-For more details about the concepts of signal processing and clustering, we attach the project guide [here](https://github.com/worzs/CoviDSP/blob/main/src/doc/speaker_recognition2021.pdf). You can see the video of the project [here](https://youtu.be/fBg70CVwH4Q).
+For more details about the concepts of signal processing and clustering, we attach the project guide [here](https://github.com/worzs/CoviDSP/blob/main/src/doc/speaker_recognition2021.pdf). You can see the video of the project [here](https://youtu.be/fBg70CVwH4Q). Slides [here](https://github.com/worzs/CoviDSP/blob/main/src/doc/CoviDSP%20Final%20Project%20-%20Slides.pdf).
 
 
 ---
